@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A *</title>
+</head>
+<style>
+    .blue {
+        background-color: lightblue;
+    }
+
+    .yellow {
+        background-color: #fdffb6;
+    }
+
+    .red {
+        background-color: #d04e50;
+    }
+
+    .green {
+        background-color: #4d908e;
+    }
+</style>
+
+<body>
+    <h2>Problema do metrô de Paris</h2>
+    <label>Estação 1</label>
+    <input type="text" id="stateInitialInput">
+    <br>
+    <br>
+    <label>Estação 2</label>
+    <input type="text" id="stateFinalInput">
+    <br>
+    <br>
+    <button onclick="calculate()">Calcular</button>
+
+    <ul id="path">
+
+    </ul>
+
+    <div id="finalReport">
+        
+    </div>
+    <br>
+</body>
+
+</html>
+
+
+
+<script>
+
+    let N = 14
+
+    let states = []
+    let openedListStates = []
+
+    let directDistances = [[]]
+    let g
+
+    window.onload = () => {
+        clearData()
+    }
+
+    function clearData() {
+
+        states = []
+        openedListStates = []
+        directDistances = [[]]
+
+        for (let i = 0; i < N; i++) {
+            directDistances[i] = []
+        }
+
+        directDistances[0][1] = 10
+        directDistances[0][2] = 18.5
+        directDistances[0][3] = 24.8
+        directDistances[0][4] = 36.4
+        directDistances[0][5] = 38.8
+        directDistances[0][6] = 35.8
+        directDistances[0][7] = 25.4
+        directDistances[0][8] = 17.6
+        directDistances[0][9] = 9.1
+        directDistances[0][10] = 16.7
+        directDistances[0][11] = 27.3
+        directDistances[0][12] = 27.6
+        directDistances[0][13] = 29.8
+
+        directDistances[1][2] = 8.5
+        directDistances[1][3] = 14.8
+        directDistances[1][4] = 26.6
+        directDistances[1][5] = 29.1
+        directDistances[1][6] = 26.1
+        directDistances[1][7] = 17.3
+        directDistances[1][8] = 10
+        directDistances[1][9] = 3.5
+        directDistances[1][10] = 15.5
+        directDistances[1][11] = 20.9
+        directDistances[1][12] = 19.1
+        directDistances[1][13] = 21.8
+
+        directDistances[2][3] = 6.3
+        directDistances[2][4] = 18.2
+        directDistances[2][5] = 20.6
+        directDistances[2][6] = 17.6
+        directDistances[2][7] = 13.6
+        directDistances[2][8] = 9.4
+        directDistances[2][9] = 10.3
+        directDistances[2][10] = 19.5
+        directDistances[2][11] = 19.1
+        directDistances[2][12] = 12.1
+        directDistances[2][13] = 16.6
+
+        directDistances[3][4] = 12
+        directDistances[3][5] = 14.4
+        directDistances[3][6] = 11.5
+        directDistances[3][7] = 12.4
+        directDistances[3][8] = 12.6
+        directDistances[3][9] = 16.7
+        directDistances[3][10] = 23.6
+        directDistances[3][11] = 18.6
+        directDistances[3][12] = 10.6
+        directDistances[3][13] = 15.4
+
+        directDistances[4][5] = 3
+        directDistances[4][6] = 2.4
+        directDistances[4][7] = 19.4
+        directDistances[4][8] = 23.3
+        directDistances[4][9] = 28.2
+        directDistances[4][10] = 34.2
+        directDistances[4][11] = 24.8
+        directDistances[4][12] = 14.5
+        directDistances[4][13] = 17.9
+
+        directDistances[5][6] = 3.3
+        directDistances[5][7] = 22.3
+        directDistances[5][8] = 25.7
+        directDistances[5][9] = 30.3
+        directDistances[5][10] = 36.7
+        directDistances[5][11] = 27.6
+        directDistances[5][12] = 15.2
+        directDistances[5][13] = 18.2
+
+        directDistances[6][7] = 20
+        directDistances[6][8] = 23
+        directDistances[6][9] = 27.3
+        directDistances[6][10] = 34.2
+        directDistances[6][11] = 25.7
+        directDistances[6][12] = 12.4
+        directDistances[6][13] = 15.6
+
+        directDistances[7][8] = 8.2
+        directDistances[7][9] = 20.3
+        directDistances[7][10] = 16.1
+        directDistances[7][11] = 6.4
+        directDistances[7][12] = 22.7
+        directDistances[7][13] = 27.6
+
+        directDistances[8][9] = 13.5
+        directDistances[8][10] = 11.2
+        directDistances[8][11] = 10.9
+        directDistances[8][12] = 21.2
+        directDistances[8][13] = 26.6
+
+        directDistances[9][10] = 17.6
+        directDistances[9][11] = 24.2
+        directDistances[9][12] = 18.7
+        directDistances[9][13] = 21.2
+
+        directDistances[10][11] = 14.2
+        directDistances[10][12] = 31.5
+        directDistances[10][13] = 35.5
+
+        directDistances[11][12] = 28.8
+        directDistances[11][13] = 33.6
+
+        directDistances[12][13] = 5.1
+
+        g = new Graph(14)
+
+        g.addEdge(1, 2, 10, "blue")
+
+        g.addEdge(2, 1, 10, "blue")
+        g.addEdge(2, 3, 8.5, "blue")
+        g.addEdge(2, 9, 10, "yellow")
+        g.addEdge(2, 10, 3.5, "yellow")
+
+        g.addEdge(3, 2, 8.5, "blue")
+        g.addEdge(3, 4, 6.3, "blue")
+        g.addEdge(3, 9, 9.4, "red")
+        g.addEdge(3, 13, 18.7, "red")
+
+        g.addEdge(4, 3, 6.3, "blue")
+        g.addEdge(4, 5, 13, "blue")
+        g.addEdge(4, 8, 15.3, "green")
+        g.addEdge(4, 13, 12.8, "green")
+
+        g.addEdge(5, 4, 13, "blue")
+        g.addEdge(5, 6, 3, "blue")
+        g.addEdge(5, 7, 2.4, "yellow")
+        g.addEdge(5, 8, 30, "yellow")
+
+        g.addEdge(6, 5, 3, "blue")
+
+        g.addEdge(7, 5, 2.4, "yellow")
+
+        g.addEdge(8, 4, 15.3, "green")
+        g.addEdge(8, 5, 30, "yellow")
+        g.addEdge(8, 9, 9.6, "yellow")
+        g.addEdge(8, 12, 6.4, "green")
+
+        g.addEdge(9, 2, 10, "yellow")
+        g.addEdge(9, 3, 9.4, "red")
+        g.addEdge(9, 8, 9.6, "yellow")
+        g.addEdge(9, 11, 12.2, "red")
+
+        g.addEdge(10, 2, 3.5, "yellow")
+
+        g.addEdge(11, 9, 12.2, "red")
+
+        g.addEdge(12, 8, 6.4, "green")
+
+        g.addEdge(13, 3, 18.7, "red")
+        g.addEdge(13, 4, 12.8, "green")
+        g.addEdge(13, 14, 5.1, "green")
+
+        g.addEdge(14, 13, 5.1, "green")
+
+        for (let i = 0; i < N; i++) {
+            states[i] = { label: i, visited: false, f: 0, g: 0, h: 0, parent: undefined, destiny: false, line: undefined }
+        }
+    }
+
+    function calculate() {
+        const stateInitial = document.getElementById("stateInitialInput")
+        const stateFinal = document.getElementById("stateFinalInput")
+
+        clearData()
+
+        const destiny = aStar(g, stateInitial.value, stateFinal.value)
+
+        // drawing path
+        let current = destiny
+        let path = []
+        let totalDistance = 0
+        let nBaldeacoes = 0
+        while (current.parent) {
+            let distance = current.g - current.parent.g
+            totalDistance += distance
+            
+            path.push({
+                stateInitial: current.parent.label,
+                stateFinal: current.label,
+                line: current.line,
+                distance
+            })
+            if (current.line != current.parent.line && current.parent.line != undefined) {
+                path.push({ baldeacao: true })
+                nBaldeacoes++
+            }
+
+            current = current.parent
+        }
+
+
+        // Imprime o caminho na tela
+        const pathList = document.getElementById("path")
+        let list = document.createElement('li')
+        let div = document.createElement('div')
+        pathList.innerHTML = ""
+
+        path.reverse()
+        path.forEach(el => {
+            list = document.createElement('li')
+            div = document.createElement('div')
+            if (el.baldeacao) {
+                div.append("Baldeação")
+            } else {
+                div.setAttribute("class", el.line)
+                div.append("Estação " + (el.stateInitial + 1) + " -> Estação " + (el.stateFinal + 1))
+                div.append(document.createElement('br'))
+                div.append("Distância percorrida: " + el.distance + " km")
+            }
+            list.append(div)
+            pathList.append(list)
+
+        })
+
+        const report = document.getElementById("finalReport")
+        report.innerHTML = ""
+        report.append("Distância total percorrida: " + totalDistance + " km.")
+        report.append(document.createElement('br'))
+        report.append("Quantidade de baldeações: "+nBaldeacoes)
+        report.append(document.createElement('br'))
+        report.append("Tempo total: "+ (nBaldeacoes * 4) +" + "+(60 * totalDistance / 30) + " = " + (nBaldeacoes * 4 + 60*totalDistance/30) + " minutos.")
+
+        stateInitial.value = ""
+        stateFinal.value = ""
+    }
+
+    function aStar(graph, startNode, finalNode) {
+
+        let current = states[startNode - 1]
+        states[finalNode - 1].destiny = true
+
+        // Calculando a distância h
+        for (let i = 0; i < N; i++) {
+            if (i == finalNode - 1) {
+                states[i].h = 0
+            } else {
+                states[i].h = (directDistances[finalNode - 1][i] ?
+                    directDistances[finalNode - 1][i] : directDistances[i][finalNode - 1])
+            }
+        }
+
+        while (!current.destiny) {
+
+            current.visited = true
+
+            graph.adjacencyList[current.label].forEach(el => {
+
+                if (!states[el.label].visited) {
+
+                    states[el.label].parent = current
+                    states[el.label].g = states[current.label].g + graph.getDistance(el.label, current.label)
+                    states[el.label].line = el.line
+                    states[el.label].f = states[el.label].g + states[el.label].h
+                    openedListStates.push(states[el.label])
+                }
+            })
+
+            openedListStates.sort((a, b) => (a.f < b.f) ? -1 : 1)
+            current = openedListStates.shift()
+        }
+
+        return current
+
+    }
+
+    class Graph {
+
+        adjacencyList = [[]]
+        constructor(vertices) {
+            for (let i = 0; i < vertices; i++) {
+                this.adjacencyList[i] = []
+            }
+        }
+
+        addEdge(u, v, cost, line) {
+            this.adjacencyList[u - 1].push({ label: v - 1, visited: false, cost, line })
+        }
+
+        getDistance(u, v) {
+            const node = this.adjacencyList[u].find(el => {
+                return el.label == v
+            })
+
+            return node ? node.cost : undefined
+        }
+    }
+
+
+</script>
